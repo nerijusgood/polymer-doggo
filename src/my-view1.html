@@ -1,0 +1,98 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="shared-styles.html">
+<script src="fetch.js"></script>
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      .intro {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 24px;
+      }
+      
+      paper-spinner {
+        margin: 24px;
+      }
+
+    </style>
+
+
+    <div class="intro">
+      <h2>Very serious app</h2>
+      <paper-button on-click="getKitten" raised class="primary">Unleass cuteness</paper-button>
+    </div>
+
+    <template is="dom-if" if="[[ doggo ]]">
+      <div class="card">
+          <template is="dom-if" if="[[ !loading ]]">
+            <img src="{{doggo}}" />
+          </template>
+        
+          <template is="dom-if" if="[[ loading ]]">
+            <paper-spinner active></paper-spinner>
+          </template>
+      </div>
+    </template>
+  </template>
+
+  <script>
+    class MyView1 extends Polymer.Element {
+      static get is() { return 'my-view1'; }
+
+      static get properties() {
+        return {
+          doggo: String,
+          loading: Boolean
+        }
+
+      };
+
+      constructor() {
+        super();
+        this.loading = true;
+      }
+
+      getKitten() {
+        console.log('Fuzzyness all around');
+
+        this.fetch('https://dog.ceo/api/breeds/image/random')
+            .then(data => this.doggo = data.message);
+      };
+
+      fetch(url) {
+        this.loading = true;
+        return fetch(url).then(response => {
+          return response.json().then(data => {
+            this.loading = false;
+            return data;
+          });
+        }, reject => {
+          // Maybe should do something like 'error'
+          return Promise.reject(reject);
+        });
+      }
+    }
+
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>
